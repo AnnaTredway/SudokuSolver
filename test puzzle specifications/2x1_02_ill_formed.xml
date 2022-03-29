@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<puzzle>
+  <name>2x1_02_ill_formed</name>
+  <rows_per_box>2</rows_per_box>
+  <cols_per_box>1</cols_per_box>
+  <start_state>{(0,0): [3]}</start_state>
+  <well_formed>False</well_formed>
+  <solvable>False</solvable>
+  <unique_solution>False</unique_solution>
+  <pigeonhole_decidable>True</pigeonhole_decidable>
+</puzzle>

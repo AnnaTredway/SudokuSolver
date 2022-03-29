@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<!-- problem from Advanced Sudoku on the Go - Conceptis Puzzles.  requires 3-combinations -->
+<puzzle>
+  <name>3x3_07_solvable</name>
+  <rows_per_box>3</rows_per_box>
+  <cols_per_box>3</cols_per_box>
+  <start_state>
+   {(0,0):[8], (0,1):[1],                                  (0,5):[3],                       (0,8):[2], \
+               (1,1):[9],                       (1,4):[2], (1,5):[7],            (1,7):[1], (1,8):[6], \
+     \
+    (3,0):[9], (3,1):[3],\
+               (4,1):[5],                       (4,4):[1],                       (4,7):[2], \
+                                                                                 (5,7):[5], (5,8):[1],  \
+    \
+    (7,0):[4], (7,1):[7],            (7,3):[1], (7,4):[3],                       (7,7):[8], \
+    (8,0):[2],                       (8,3):[5],                                  (8,7):[6], (8,8):[3]  \
+   }
+  </start_state>
+  <well_formed>True</well_formed>
+  <solvable>True</solvable>
+  <unique_solution>True</unique_solution>
+  <pigeonhole_decidable>True</pigeonhole_decidable>
+</puzzle>

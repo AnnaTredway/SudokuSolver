@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<puzzle>
+  <name>2x1_04_solvable</name>
+  <rows_per_box>2</rows_per_box>
+  <cols_per_box>1</cols_per_box>
+  <start_state>{(1,0): [2]}</start_state>
+  <well_formed>True</well_formed>
+  <solvable>True</solvable>
+  <unique_solution>True</unique_solution>
+  <pigeonhole_decidable>True</pigeonhole_decidable>
+</puzzle>
