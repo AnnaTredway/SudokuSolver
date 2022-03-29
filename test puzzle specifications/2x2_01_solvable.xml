@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!-- from http://www.menneske.no/sudoku/2x2/eng/ -->
+<puzzle>
+  <name>2x2_01_solvable</name>
+  <rows_per_box>2</rows_per_box>
+  <cols_per_box>2</cols_per_box>
+  <start_state>
+   {(0,0):[1], \
+               (1,1):[2], (1,2):[1], \
+               (2,1):[4], (2,2):[3], \
+                                    (3,3):[4], \
+   }
+  </start_state>
+  <well_formed>True</well_formed>
+  <solvable>True</solvable>
+  <unique_solution>True</unique_solution>
+  <pigeonhole_decidable>True</pigeonhole_decidable>
+</puzzle>
