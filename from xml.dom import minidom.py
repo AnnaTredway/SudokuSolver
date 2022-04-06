@@ -3,23 +3,32 @@ from xml.dom import minidom
 from tkinter import Tk     # from tkinter import Tk for Python 3.x
 from tkinter.filedialog import askopenfilename
 import os
+import argparse
 
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(description='...')
+    p.add_argument('--puzzle_name', required=False)
+    p.add_argument('-solve_on_startup', default=False)
+    p.add_argument('-time_delay', default=0)
+    p.add_argument('-solution_name', default=0)
+    p.add_argument('-exit_on_solve', default=False)
+    args = p.parse_args()
 
+print(args.puzzle_name)
+print(args.solve_on_startup)
+print(args.time_delay)
+print(args.solution_name)
+print(args.exit_on_solve)
 
 # Hides root window for now
-
-
-
-Tk().withdraw() 
+# >>> File Selector <<<
+#Tk().withdraw() 
     # show an "Open" dialog box and return the path to the selected file
-file = askopenfilename()
+#file = askopenfilename()
 
+file='test_puzzle_specifications/3x3_06_solvable.xml'
 if os.path.isfile(file): 
     file = minidom.parse(file)
-
-# parse an xml file by name
-#file = minidom.parse('test_puzzle_specifications/0x0_03_solvable.xml')
-# Retrieve puzzle elements
 
 name = file.getElementsByTagName('name')[0]
 sRowsPerBox = file.getElementsByTagName('rows_per_box')[0]
