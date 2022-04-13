@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from enum import unique
 from xml.dom import minidom
 from tkinter import Tk     # from tkinter import Tk for Python 3.x
@@ -26,9 +27,10 @@ print(args.exit_on_solve)
     # show an "Open" dialog box and return the path to the selected file
 #file = askopenfilename()
 
-file='test_puzzle_specifications/3x3_06_solvable.xml'
+#file='test_puzzle_specifications/3x3_06_solvable.xml'
+file = args.puzzle_name
 if os.path.isfile(file): 
-    file = minidom.parse(file)
+   file = minidom.parse(file)
 
 name = file.getElementsByTagName('name')[0]
 sRowsPerBox = file.getElementsByTagName('rows_per_box')[0]
@@ -36,45 +38,60 @@ sColsPerBox = file.getElementsByTagName('cols_per_box')[0]
 startState = file.getElementsByTagName('start_state')[0]
 wellFormed = file.getElementsByTagName('well_formed')[0]
 solvable = file.getElementsByTagName('solvable')[0]
+
+
 uniqueSolution = file.getElementsByTagName('unique_solution')[0]
 pigeonholeDecidable = file.getElementsByTagName('pigeonhole_decidable')[0]
 
 print('Name Of Puzzle=',name.firstChild.data)
 print('Rows per Box=',sRowsPerBox.firstChild.data)
 print('Cols per Box=',sColsPerBox.firstChild.data)
-
 print('If Well Formed=',wellFormed.firstChild.data)
 print('If Solvable=',solvable.firstChild.data)
 print('If uniquesoln =',uniqueSolution.firstChild.data)
 print('If PigeonHole decidable=',pigeonholeDecidable.firstChild.data)
 row = 0
 col = 0
-startState = eval(startState.firstChild.data.replace("\\","").replace("\n","").replace("\t",""))
+try:    
+    startState = eval(startState.firstChild.data.replace("\\","").replace("\n","").replace("\t",""))
+except: startState = 'none'
 rowsPerBox = int(sRowsPerBox.firstChild.data)
 colsPerBox = int(sColsPerBox.firstChild.data)
+solvable = bool(solvable.firstChild.data)
+
+
+board = []
+row = []
+gridline = []
+for col in range(0,colsPerBox*rowsPerBox):
+    gridline.append(0)
+grid = []
+for row in range(0,colsPerBox*rowsPerBox):
+    board.append(list(gridline))
+
+
 
 # Creating the board
-board = [
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0],
-]
 
 
+#what to display, if there is no puzzle to generate
+# Is there any significance to the 01,02,03 in the xml files?
+# Explain the start state for the 2x1_01_solvable, why are there more values given then what should be in the grid
 
-for row in range(0,rowsPerBox*rowsPerBox):
-    for col in range(0,colsPerBox*colsPerBox):
-        if (row,col) in startState.keys():
-            board[row][col] = startState[row,col][0]
 
-for row in range(0,rowsPerBox*rowsPerBox):
-    print(board[row][0:10])
+if rowsPerBox !=0 and colsPerBox !=0 and solvable == True and startState != 'none':
+    for row in range(0,rowsPerBox*colsPerBox):
+        for col in range(0,rowsPerBox*colsPerBox):
+            if (row,col) in startState.keys():
+                board[row][col] = startState[row,col][0]
+    for row in range(0,rowsPerBox*colsPerBox):
+        #fix [0:4] to work with all puzzles
+            print(board[row][0:col+1])
+else: print('no puzzle')
+
+print('this is the end state board--------------------------------')
+print(board)
+
 
 
 
