@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "args": ["--puzzle_name", "test_puzzle_specifications/0x0_01_solvable.xml", "-solve_on_startup", "true"],
+            "args": ["--puzzle_name", "test_puzzle_specifications/2x2_01_solvable.xml", "-solve_on_startup", "true"],
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
