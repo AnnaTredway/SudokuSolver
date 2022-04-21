@@ -1,4 +1,3 @@
-#from asyncio.windows_events import NULL
 from enum import unique
 from xml.dom import minidom
 from tkinter import Tk     # from tkinter import Tk for Python 3.x
@@ -35,9 +34,6 @@ solvable = file.getElementsByTagName('solvable')[0]
 uniqueSolution = file.getElementsByTagName('unique_solution')[0]
 pigeonholeDecidable = file.getElementsByTagName('pigeonhole_decidable')[0]
 
-row = 0
-col = 0
-
 try:    
     startState = eval(startState.firstChild.data.replace("\\","").replace("\n","").replace("\t",""))
 except: startState = 'none'
@@ -68,7 +64,7 @@ else: print('no puzzle')
 
 print('--------------------')
 
-# Populate the remaining cells with possible choices
+# Populate a list of choices for empty cells
 totalChoices = rowsPerBox * colsPerBox
 listOfChoices = []
 for x in range(1, totalChoices + 1):
@@ -78,46 +74,54 @@ print('Possible choices for empty cells: ', listOfChoices)
 
 print('--------------------')
 
+# Populate the empty cells with the list of choices
 for row in range(0,rowsPerBox*colsPerBox):
     for col in range(0,rowsPerBox*colsPerBox):
         if board[col][row] == 0:
             board[col][row] = listOfChoices
 
+# Board printing, can be deleted later
 for row in board:
     print(row)
 
 print('--------------------')
 
-# Solving logic
-
+# >>>>> Solving logic <<<<<
 rowCoordinates = []
 colCoordinates = []
 subGridTopLeftCoordinates = []
+singleSubGrid = []
 
-def generateRowCoordinates(rowNumber):
+def generateRowCoordinates(rowNumber, rowsPerBox, colsPerBox):
     rowCoordinates.clear()
     for col in range(0,rowsPerBox*colsPerBox):
         if type(board[rowNumber][col]) == int:
             rowCoordinates.append([rowNumber, col])
 
-def generateColumnCoordinates(colNumber):
+def generateColumnCoordinates(colNumber, rowsPerBox, colsPerBox):
     colCoordinates.clear()
     for row in range(0,rowsPerBox*colsPerBox):
         if type(board[row][colNumber]) == int:
             colCoordinates.append([row, colNumber])
 
-def generateTopLeftSubGridCoordinates():
-    totalSubGrids = (rowsPerBox*colsPerBox)
+def generateTopLeftSubGridCoordinates(rowsPerBox, colsPerBox):
+    if rowsPerBox == 1 or colsPerBox == 1:
+        totalSubGrids = 1
+    elif rowsPerBox == 0 or colsPerBox == 0:
+        return
+    else:
+        totalSubGrids = (rowsPerBox*colsPerBox)
     subGridTopLeftCoordinates.clear()
     for i in range(0,totalSubGrids):
         x = (i//rowsPerBox)*rowsPerBox
-        y = (i%colsPerBox)*colsPerBox
+        y = (i%rowsPerBox)*colsPerBox
         subGridTopLeftCoordinates.append([x, y])
 
-finalGrid = []
-singleSubGrid = []
-def populateAllSubGrids():
-    finalGrid.clear()
+def populateASubGrid(rowCord, colCord, rowsPerBox, colsPerBox):
+    if rowsPerBox <= 1:
+        rowsPerBox = colsPerBox
+    if colsPerBox <= 1:
+        colsPerBox = rowsPerBox
     for pair in subGridTopLeftCoordinates:
         singleSubGrid.append(pair)
         for x in range(1, rowsPerBox):
@@ -126,77 +130,17 @@ def populateAllSubGrids():
                 singleSubGrid.append([(pair[0] + x), (pair[1]) + y])
         for y in range(1, colsPerBox):
                 singleSubGrid.append([(pair[0]), (pair[1] + y)])
-        finalGrid.append(singleSubGrid)
-        print(singleSubGrid)
-        singleSubGrid.clear()
+        if singleSubGrid.__contains__([rowCord, colCord]):
+            return
+        else:
+            singleSubGrid.clear()
 
-generateRowCoordinates(2)
-generateColumnCoordinates(1)
-generateTopLeftSubGridCoordinates()
-populateAllSubGrids()
+generateRowCoordinates(0, rowsPerBox, colsPerBox)
+generateColumnCoordinates(0, rowsPerBox, colsPerBox)
+generateTopLeftSubGridCoordinates(rowsPerBox, colsPerBox)
+populateASubGrid(0, 0, rowsPerBox, colsPerBox)
 
-#print(rowCoordinates)
-#print(colCoordinates)
-print(subGridTopLeftCoordinates)
-print(finalGrid)
-
-for index in finalGrid:
-    print(index)
-
-# rows per box = 2
-# cols per box = 2
-# box 0: top-left (x,y):
-# to find x (box#//rowsperbox)*rowsperbox, this is how you get (x,)
-# to find y (box#%colsperbox)*colsperbox, this is how you get (,y)
-
-# x-value: (0//2)*2 = 0 y-value: (0%2)*2 = 0, therefore you get (0,0)
-# x-value: (1//2)*2 = 0 y-value: (1%2)*2 = 2, therefore you get (0,2)
-# x-value: (2//2)*2 = 2 y-value: (2%2)*2 = 0, therefore you get (2,0)
-# x-value: (3//2)*2 = 2 y-value: (3%2)*2 = 2, therefore you get (2,2)
-
-# 0 0 - 0 0 
-# 0 0 - 0 0 
-# ---------
-# 0 0 - 0 0 
-# 0 0 - 0 0
-
-# 0 0 0 - 0 0 0 - 0 0 0
-# 0 0 0 - 0 0 0 - 0 0 0 
-# 0 0 0 - 0 0 0 - 0 0 0 
-# ----- - ----- - -----
-# 0 0 0 - 0 0 0 - 0 0 0
-# 0 0 0 - 0 0 0 - 0 0 0 
-# 0 0 0 - 0 0 0 - 0 0 0 
-# ----- - ----- - -----
-# 0 0 0 - 0 0 0 - 0 0 0
-# 0 0 0 - 0 0 0 - 0 0 0 
-# 0 0 0 - 0 0 0 - 0 0 0 
-
-'''if type(board[col][row]) != int: 
-    count = 0
-    list = []
-    for listElem in board[col][row]:
-        count += 1
-    print('Total Number of elements : ', count)'''
-
-#class SudokuBoard:
-   # def __init__(startState,rowsPerBox, colPerBox):
-
-#for row in range(0,rowsPerBox*colsPerBox):
-    #for col in range(0,rowsPerBox*colsPerBox):
-        #if type(board[row][col]) == int:
-            #generateRowCoordinates(row)
-
-#print('Name Of Puzzle=',name.firstChild.data)
-#print('Rows per Box=',sRowsPerBox.firstChild.data)
-#print('Cols per Box=',sColsPerBox.firstChild.data)
-#print('If Well Formed=',wellFormed.firstChild.data)
-#print('If Solvable=',solvable.firstChild.data)
-#print('If uniquesoln =',uniqueSolution.firstChild.data)
-#print('If PigeonHole decidable=',pigeonholeDecidable.firstChild.data)
-
-#print(args.puzzle_name)
-#print(args.solve_on_startup)
-#print(args.time_delay)
-#print(args.solution_name)
-#print(args.exit_on_solve)
+print('row coords: ', rowCoordinates)
+print('col clords: ', colCoordinates)
+print('subgrid top left cords: ', subGridTopLeftCoordinates)
+print('single subgrid: ', singleSubGrid)
