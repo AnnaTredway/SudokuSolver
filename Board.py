@@ -1,6 +1,7 @@
 class Board:
     def __init__(self):
          self.board = []
+         
 
     # Create initial m*n sized board based on puzzle specs
     def createBoard(self, rowsPerBox, colsPerBox, startState, solvable):
@@ -19,6 +20,8 @@ class Board:
                     if (row,col) in startState.keys():
                         self.board[row][col] = startState[row,col][0]
         else: print('no puzzle')
+
+        return self.board
 
     # Populate a the empty cells of the board with a list of possible choices
     def populateBoard(self, rowsPerBox, colsPerBox):
