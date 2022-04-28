@@ -72,6 +72,14 @@ def main(args):
             else:
                 singleSubGrid.clear()
 
+    window = tk.Tk()
+    gui = GUI(window, puzzle)
+    gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
+    gui.temp()
+    #window.geometry('1000x500')
+    window.mainloop()   
+
+
     #generateRowCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
     #generateColumnCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
     generateTopLeftSubGridCoordinates(puzzle.rowsPerBox, puzzle.colsPerBox)
@@ -82,6 +90,19 @@ def main(args):
     #print('subgrid top left cords: ', subGridTopLeftCoordinates)
     #print('single subgrid: ', singleSubGrid)
 
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(description='...')
+    p.add_argument('--puzzle_name', required=False)
+    p.add_argument('-solve_on_startup', default=False)
+    p.add_argument('-time_delay', default=0)
+    p.add_argument('-solution_name', default=0)
+    p.add_argument('-exit_on_solve', default=False)
+    args = p.parse_args()
+
+main(args)
+
+'''
     # Iterate through unsolved board
     for row in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
         for col in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
@@ -89,6 +110,7 @@ def main(args):
             # If the current cell has a list of possible values
             if type(board.board[row][col]) != int:
                 # Generate its subgrid
+
                 populateASubGrid(row, col, puzzle.rowsPerBox, puzzle.colsPerBox)
                 print(singleSubGrid)
 
@@ -109,23 +131,8 @@ def main(args):
                             del board.board[row][col]
 
                             input("Press Enter to continue...")
+'''
 
-
-    '''window = tk.Tk()
-    gui = GUI(window, puzzle)
-    gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
-    window.mainloop()'''
-
-if __name__ == '__main__':
-    p = argparse.ArgumentParser(description='...')
-    p.add_argument('--puzzle_name', required=False)
-    p.add_argument('-solve_on_startup', default=False)
-    p.add_argument('-time_delay', default=0)
-    p.add_argument('-solution_name', default=0)
-    p.add_argument('-exit_on_solve', default=False)
-    args = p.parse_args()
-
-main(args)
 
 # >>> File Selector <<<
 # Hides root window for now
