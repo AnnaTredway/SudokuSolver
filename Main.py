@@ -7,6 +7,7 @@ import argparse
 from PuzzleSpecs import PuzzleSpecs
 from Board import Board
 from GUI import GUI
+import copy
 
 def main(args):
     file = args.puzzle_name
@@ -22,6 +23,10 @@ def main(args):
     board.printBoard()
     print("----------------------------")
 
+    #window = tk.Tk()
+    #gui = GUI(window, puzzle)
+    #gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
+    #window.mainloop()
 
     # >>>>> Solving logic <<<<<
     rowCoordinates = []
@@ -72,23 +77,107 @@ def main(args):
             else:
                 singleSubGrid.clear()
 
-    window = tk.Tk()
-    gui = GUI(window, puzzle)
-    gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
-    gui.temp()
-    #window.geometry('1000x500')
-    window.mainloop()   
-
-
     #generateRowCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
     #generateColumnCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
     generateTopLeftSubGridCoordinates(puzzle.rowsPerBox, puzzle.colsPerBox)
     #populateASubGrid(0, 0, puzzle.rowsPerBox, puzzle.colsPerBox)
 
-    #print('row coords: ', rowCoordinates)
-    #print('col clords: ', colCoordinates)
-    #print('subgrid top left cords: ', subGridTopLeftCoordinates)
-    #print('single subgrid: ', singleSubGrid)
+    def generateNumbersInSubGrid(subGrid):
+        numbersInSubGrid = []
+        for coordPair in subGrid:
+            if type(board.board[coordPair[0]][coordPair[1]]) == int:
+                numbersInSubGrid.append(board.board[coordPair[0]][coordPair[1]])
+        return numbersInSubGrid
+    
+    def generateNumbersInRow(rowCoordinates):
+        numbersInRow = []
+        for coordPair in rowCoordinates:
+            if type(board.board[coordPair[0]][coordPair[1]]):
+                numbersInRow.append(board.board[coordPair[0]][coordPair[1]])
+        return numbersInRow
+
+    def generateNumbersInColumn(colCoordinates):
+        numbersInCol = []
+        for coordPair in colCoordinates:
+            if type(board.board[coordPair[0]][coordPair[1]]):
+                numbersInCol.append(board.board[coordPair[0]][coordPair[1]])
+        return numbersInCol
+
+    # Iterate through unsolved board
+    stopSieve = False
+    while stopSieve == False:
+        for row in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
+            for col in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
+                singleSubGrid.clear()
+                # If the current cell has a list of possible values
+                if type(board.board[row][col]) != int:
+                    # Generate its combinations of subgrid coordinate pairs
+                    populateASubGrid(row, col, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    #print(singleSubGrid)
+
+                    # Generate its combinations row coordinate pairs
+                    generateRowCoordinates(row, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    #print(rowCoordinates)
+
+                    # Generate its combinations column coordinate pairs
+                    generateColumnCoordinates(col, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    #print(colCoordinates)
+
+                    '''Go through the lists of generated coordinate pairs
+                    And then respectively generate lists of numbers from the coordinate pairs
+                    whose cell only contains one number'''
+
+                    listOfSubGridNumbers = generateNumbersInSubGrid(singleSubGrid)
+                    listOfRowNumbers = generateNumbersInRow(rowCoordinates)
+                    listOfColNumbers = generateNumbersInColumn(colCoordinates)
+
+                    # Start sieving against subgrid first
+                    for number in board.board[row][col]:
+                        if number in listOfSubGridNumbers:
+                            temp = copy.copy(board.board[row][col])
+                            temp.remove(number)
+                            board.board[row][col] = temp
+                            board.printBoard()
+                            print("--------")
+                    
+                    # Sieve against row
+                    for number in board.board[row][col]:
+                        if number in listOfRowNumbers:
+                            temp = copy.copy(board.board[row][col])
+                            temp.remove(number)
+                            board.board[row][col] = temp
+                            board.printBoard()
+                            print("--------")
+                    
+                    # Sieve against column
+                    for number in board.board[row][col]:
+                        if number in listOfColNumbers:
+                            temp = copy.copy(board.board[row][col])
+                            temp.remove(number)
+                            board.board[row][col] = temp
+                            board.printBoard()
+                            print("--------")
+
+                    # If the current cell has a list with only one number,
+                    # remove the list and replace only the number
+                    if len(board.board[row][col]) == 1:
+                        temp = copy.copy(board.board[row][col])
+                        board.board[row][col] = temp[0]
+                        board.printBoard()
+                        print("--------")
+
+        # Check if any cells in the puzzle still contain more than one number
+        counter = 0
+        for row in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
+            #for col in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
+            if all(type(x) is int for x in board.board[row]) != True:
+                counter = counter + 1
+
+        if counter == 0:
+            stopSieve = True
+                            
+        #input("Press enter to cont...")
+    board.printBoard()
 
 
 if __name__ == '__main__':
@@ -101,38 +190,6 @@ if __name__ == '__main__':
     args = p.parse_args()
 
 main(args)
-
-'''
-    # Iterate through unsolved board
-    for row in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
-        for col in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
-            singleSubGrid.clear()
-            # If the current cell has a list of possible values
-            if type(board.board[row][col]) != int:
-                # Generate its subgrid
-
-                populateASubGrid(row, col, puzzle.rowsPerBox, puzzle.colsPerBox)
-                print(singleSubGrid)
-
-                # Generate its row
-                generateRowCoordinates(row, puzzle.rowsPerBox, puzzle.colsPerBox)
-                print(rowCoordinates)
-
-                # Generate its column
-                generateColumnCoordinates(col, puzzle.rowsPerBox, puzzle.colsPerBox)
-                print(colCoordinates)
-
-                # >>>>> To do: only sieve the subgrid cell if it is a single integer (not a list)<<<<<
-
-                # Sieve the current cell against its subgrid
-                for currentValue in board.board[row][col]:
-                    for subGridValue in singleSubGrid:
-                        if currentValue == board.board[subGridValue[0]][subGridValue[1]]:
-                            del board.board[row][col]
-
-                            input("Press Enter to continue...")
-'''
-
 
 # >>> File Selector <<<
 # Hides root window for now

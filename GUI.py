@@ -20,7 +20,7 @@ class GUI:
 
         if os.path.isfile(fileName):
             file = minidom.parse(fileName)
-            puzzle = PuzzleSpecs(file)
+            #puzzle = PuzzleSpecs(file)
             self.puzzle = PuzzleSpecs(file)
             self.puzzleSpecs.config(text=self.puzzle.convertSpecsToText())
         else:
