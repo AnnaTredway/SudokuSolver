@@ -1,11 +1,10 @@
+import copy
 import os
 import tkinter as tk
 from tkinter.filedialog import askopenfile
 from xml.dom import minidom
 from Board import Board
 from PuzzleSpecs import PuzzleSpecs
-# Right now, when you run the program, you can enter text into the text box.
-# Thes press button, and it will display the text that was in the box elsewhere on the screen.
 
 # >>> File Selector <<<
 # Hides root window for now
@@ -28,15 +27,15 @@ class GUI:
 
     def storePuzzleClick(self):
         storePuzzle = self.storePuzzleEntry.get()
-    
-    #def grid(self):      
-       
 
     def __init__(self, window, puzzle):
         self.window = window
         self.puzzle = puzzle
 
         # Declare widgets
+        self.listOfFrames = []
+        self.listOfLabels = []
+
         #specify puzzle as filename butoon
         self.chooseFileBtn = tk.Button(self.window, text="Specify puzzle as file name: ", command=self.chooseFileClick)
         self.chooseFileEntry = tk.Entry(self.window)
@@ -51,7 +50,7 @@ class GUI:
 
         self.puzzleSpecs = tk.Label(self.window, text="No active puzzle.")
 
-        #grid tesing cases.
+        # grid tesing cases.
         # Add widgets to grid
         self.chooseFileBtn.grid(column=0, row=9)
         self.chooseFileEntry.grid(column=1, row=9)
@@ -62,39 +61,41 @@ class GUI:
         self.stepCountLabel.grid(column=1,row=11)
         self.stepCountEntry.grid(column=2,row=11)
         
-
-        
-    def temp(self):
-        self.puzzle
-        #grid declaration
-        dimOfGrid = self.puzzle.colsPerBox * self.puzzle.colsPerBox
-        rowdim = coldim = dimOfGrid
+    def initialBoardCreation(self):
         rowwidth = 20
         rowheight = 4
 
-        labels = []
-        #self.window.rowconfigure( [r for r in range(coldim)], weight=1, minsize=25)
-        #self.window.columnconfigure( [c for c in range(coldim)], weight=1, minsize=25)
-        
-        Temp = Board()
-        Temp = Temp.createBoard(self.puzzle.rowsPerBox, self.puzzle.colsPerBox, self.puzzle.startState, self.puzzle.solvable)
+        board = Board()
+        board = board.createBoard(self.puzzle.rowsPerBox, self.puzzle.colsPerBox, self.puzzle.startState, self.puzzle.solvable, self.puzzle.wellFormed)
 
-        for row in range(0,rowdim):
-            for col in range(0,coldim):
-                frame = tk.Frame(master = self.window, highlightbackground='black', highlightthickness='2' )
+        for row in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
+            for col in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
+                frame = tk.Frame(master=self.window, highlightbackground='black', highlightthickness='2')
                 frame.grid(row=row, column=col)
-                label = tk.Label(frame, text=f'({Temp[row][col]})', height=rowheight, width=rowwidth, bg='white')
+                label = tk.Label(frame, text=f'{board[row][col]}', height=rowheight, width=rowwidth, fg='black', bg='white')
                 label.grid(row=row, column=col)
+                self.listOfFrames.append(frame)
+                self.listOfLabels.append(label)
+    
+    def updateBoard(self, board):
+        rowwidth = 20
+        rowheight = 4
 
+        for frame in self.listOfFrames:
+            temp = tk.Frame(frame)
+            temp.destroy()
+        for label in self.listOfLabels:
+            temp = tk.Label(label)
+            temp.destroy()
+        
+        self.listOfFrames.clear()
+        self.listOfLabels.clear()
 
-
-'''for row in range(0,rowdim):
-    for col in range(0,coldim):
-        frame = tk.Frame(master = window, highlightbackground='black', highlightthickness='2' )
-        frame.grid(row=row, column=col)
-        for rowStart in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
-            for colStart in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
-                if (row,col) in self.puzzle.startState.keys():
-                    labels[rowStart][colStart] = self.puzzle.startState[rowStart,colStart][0]
-                    label = tk.Label(frame, text=f'({rowStart},{colStart})', height=rowheight, width=rowwidth, bg='white')
-                    label.grid(row=row, column=col)'''
+        for row in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
+            for col in range(0,self.puzzle.rowsPerBox*self.puzzle.colsPerBox):
+                frame = tk.Frame(master=self.window, highlightbackground='black', highlightthickness='2')
+                frame.grid(row=row, column=col)
+                label = tk.Label(frame, text=f'{board[row][col]}', height=rowheight, width=rowwidth, fg='black', bg='white')
+                label.grid(row=row, column=col)
+                self.listOfFrames.append(frame)
+                self.listOfLabels.append(label)

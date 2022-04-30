@@ -1,4 +1,5 @@
 from enum import unique
+from tracemalloc import stop
 from xml.dom import minidom
 import tkinter as tk  # from tkinter import Tk for Python 3.x
 from tkinter.filedialog import askopenfilename
@@ -8,6 +9,7 @@ from PuzzleSpecs import PuzzleSpecs
 from Board import Board
 from GUI import GUI
 import copy
+import time
 
 def main(args):
     file = args.puzzle_name
@@ -16,120 +18,52 @@ def main(args):
 
     puzzle = PuzzleSpecs(file)
     board = Board()
-    board.createBoard(puzzle.rowsPerBox, puzzle.colsPerBox, puzzle.startState, puzzle.solvable)
-    board.printBoard()
-    print("----------------------------")
-    board.populateBoard(puzzle.rowsPerBox, puzzle.colsPerBox)
-    board.printBoard()
-    print("----------------------------")
+    board.createBoard(puzzle.rowsPerBox, puzzle.colsPerBox, puzzle.startState, puzzle.solvable, puzzle.wellFormed)
+    #board.printBoard()
+    #print("----------------------------")
+    if board.board:
+        board.populateBoard(puzzle.rowsPerBox, puzzle.colsPerBox)
+        board.printBoard()
+        stopSieve = False
+    else:
+        stopSieve = True
+    #print("----------------------------")
 
-    #window = tk.Tk()
-    #gui = GUI(window, puzzle)
-    #gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
-    #window.mainloop()
-
-    # >>>>> Solving logic <<<<<
-    rowCoordinates = []
-    colCoordinates = []
-    subGridTopLeftCoordinates = []
-    singleSubGrid = []
-
-    def generateRowCoordinates(rowNumber, rowsPerBox, colsPerBox):
-        rowCoordinates.clear()
-        for col in range(0,rowsPerBox*colsPerBox):
-            if type(board.board[rowNumber][col]) == int:
-                rowCoordinates.append([rowNumber, col])
-
-    def generateColumnCoordinates(colNumber, rowsPerBox, colsPerBox):
-        colCoordinates.clear()
-        for row in range(0,rowsPerBox*colsPerBox):
-            if type(board.board[row][colNumber]) == int:
-                colCoordinates.append([row, colNumber])
-
-    def generateTopLeftSubGridCoordinates(rowsPerBox, colsPerBox):
-        if rowsPerBox == 1 or colsPerBox == 1:
-            totalSubGrids = 1
-        elif rowsPerBox == 0 or colsPerBox == 0:
-            return
-        else:
-            totalSubGrids = (rowsPerBox*colsPerBox)
-        subGridTopLeftCoordinates.clear()
-        for i in range(0,totalSubGrids):
-            x = (i//rowsPerBox)*rowsPerBox
-            y = (i%rowsPerBox)*colsPerBox
-            subGridTopLeftCoordinates.append([x, y])
-
-    def populateASubGrid(rowCord, colCord, rowsPerBox, colsPerBox):
-        if rowsPerBox <= 1:
-            rowsPerBox = colsPerBox
-        if colsPerBox <= 1:
-            colsPerBox = rowsPerBox
-        for pair in subGridTopLeftCoordinates:
-            singleSubGrid.append(pair)
-            for x in range(1, rowsPerBox):
-                singleSubGrid.append([(pair[0] + x), (pair[1])])
-                for y in range(1, colsPerBox):
-                    singleSubGrid.append([(pair[0] + x), (pair[1]) + y])
-            for y in range(1, colsPerBox):
-                    singleSubGrid.append([(pair[0]), (pair[1] + y)])
-            if singleSubGrid.__contains__([rowCord, colCord]):
-                return
-            else:
-                singleSubGrid.clear()
-
-    #generateRowCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
-    #generateColumnCoordinates(0, puzzle.rowsPerBox, puzzle.colsPerBox)
-    generateTopLeftSubGridCoordinates(puzzle.rowsPerBox, puzzle.colsPerBox)
-    #populateASubGrid(0, 0, puzzle.rowsPerBox, puzzle.colsPerBox)
-
-    def generateNumbersInSubGrid(subGrid):
-        numbersInSubGrid = []
-        for coordPair in subGrid:
-            if type(board.board[coordPair[0]][coordPair[1]]) == int:
-                numbersInSubGrid.append(board.board[coordPair[0]][coordPair[1]])
-        return numbersInSubGrid
+    window = tk.Tk()
+    gui = GUI(window, puzzle)
+    gui.puzzleSpecs.config(text=puzzle.convertSpecsToText())
+    gui.initialBoardCreation()
+    window.update()
+    time.sleep(3)
     
-    def generateNumbersInRow(rowCoordinates):
-        numbersInRow = []
-        for coordPair in rowCoordinates:
-            if type(board.board[coordPair[0]][coordPair[1]]):
-                numbersInRow.append(board.board[coordPair[0]][coordPair[1]])
-        return numbersInRow
-
-    def generateNumbersInColumn(colCoordinates):
-        numbersInCol = []
-        for coordPair in colCoordinates:
-            if type(board.board[coordPair[0]][coordPair[1]]):
-                numbersInCol.append(board.board[coordPair[0]][coordPair[1]])
-        return numbersInCol
-
-    # Iterate through unsolved board
-    stopSieve = False
-    while stopSieve == False:
+    def solve(flag):
+        currentBoardState = []
+        currentBoardState = copy.deepcopy(board.board)
+        board.generateTopLeftSubGridCoordinates(puzzle.rowsPerBox, puzzle.colsPerBox)
         for row in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
             for col in range(0,puzzle.rowsPerBox*puzzle.colsPerBox):
-                singleSubGrid.clear()
+                board.singleSubGrid.clear()
                 # If the current cell has a list of possible values
                 if type(board.board[row][col]) != int:
                     # Generate its combinations of subgrid coordinate pairs
-                    populateASubGrid(row, col, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    board.populateASubGrid(row, col, puzzle.rowsPerBox, puzzle.colsPerBox)
                     #print(singleSubGrid)
 
                     # Generate its combinations row coordinate pairs
-                    generateRowCoordinates(row, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    board.generateRowCoordinates(row, puzzle.rowsPerBox, puzzle.colsPerBox)
                     #print(rowCoordinates)
 
                     # Generate its combinations column coordinate pairs
-                    generateColumnCoordinates(col, puzzle.rowsPerBox, puzzle.colsPerBox)
+                    board.generateColumnCoordinates(col, puzzle.rowsPerBox, puzzle.colsPerBox)
                     #print(colCoordinates)
 
                     '''Go through the lists of generated coordinate pairs
                     And then respectively generate lists of numbers from the coordinate pairs
                     whose cell only contains one number'''
 
-                    listOfSubGridNumbers = generateNumbersInSubGrid(singleSubGrid)
-                    listOfRowNumbers = generateNumbersInRow(rowCoordinates)
-                    listOfColNumbers = generateNumbersInColumn(colCoordinates)
+                    listOfSubGridNumbers = board.generateNumbersInSubGrid(board.singleSubGrid)
+                    listOfRowNumbers = board.generateNumbersInRow(board.rowCoordinates)
+                    listOfColNumbers = board.generateNumbersInColumn(board.colCoordinates)
 
                     # Start sieving against subgrid first
                     for number in board.board[row][col]:
@@ -137,8 +71,13 @@ def main(args):
                             temp = copy.copy(board.board[row][col])
                             temp.remove(number)
                             board.board[row][col] = temp
-                            board.printBoard()
-                            print("--------")
+                            #board.printBoard()
+                            #print("--------")
+
+                            gui.updateBoard(board.board)
+                            window.update()
+                            time.sleep(1)
+
                     
                     # Sieve against row
                     for number in board.board[row][col]:
@@ -146,8 +85,12 @@ def main(args):
                             temp = copy.copy(board.board[row][col])
                             temp.remove(number)
                             board.board[row][col] = temp
-                            board.printBoard()
-                            print("--------")
+                            #board.printBoard()
+                            #print("--------")
+
+                            gui.updateBoard(board.board)
+                            window.update()
+                            time.sleep(1)
                     
                     # Sieve against column
                     for number in board.board[row][col]:
@@ -155,16 +98,24 @@ def main(args):
                             temp = copy.copy(board.board[row][col])
                             temp.remove(number)
                             board.board[row][col] = temp
-                            board.printBoard()
-                            print("--------")
+                            #board.printBoard()
+                            #print("--------")
+
+                            gui.updateBoard(board.board)
+                            window.update()
+                            time.sleep(1)
 
                     # If the current cell has a list with only one number,
                     # remove the list and replace only the number
                     if len(board.board[row][col]) == 1:
                         temp = copy.copy(board.board[row][col])
                         board.board[row][col] = temp[0]
-                        board.printBoard()
-                        print("--------")
+                        #board.printBoard()
+                        #print("--------")
+
+                        gui.updateBoard(board.board)
+                        window.update()
+                        time.sleep(1)
 
         # Check if any cells in the puzzle still contain more than one number
         counter = 0
@@ -175,11 +126,26 @@ def main(args):
 
         if counter == 0:
             stopSieve = True
-                            
-        #input("Press enter to cont...")
-    board.printBoard()
+            return stopSieve
+        else:
+            stopSieve = False
 
+        if board.board == currentBoardState:
+            stopSieve = True
+            return stopSieve
+        else:
+            stopSieve = False
 
+        board.printBoard()
+        return stopSieve
+
+    # Iterate through unsolved board
+    while stopSieve == False:
+        stopSieve = solve(stopSieve)
+
+    window.mainloop()
+
+# Parse command line arguments
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description='...')
     p.add_argument('--puzzle_name', required=False)
