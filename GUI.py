@@ -24,6 +24,13 @@ class GUI:
         else:
             self.puzzleSpecs.config(text="Error. No such file or directory: " + self.chooseFileEntry.get())
 
+    def fileSelector(self):
+        fileName = askopenfile()
+        file = minidom.parse(fileName)
+        self.puzzle = PuzzleSpecs(file)
+        self.puzzleSpecs.config(text=self.puzzle.convertSpecsToText())
+        self.initialBoardCreation()
+
     def storePuzzleClick(self):
         storePuzzle = self.storePuzzleEntry.get()
 
@@ -47,10 +54,10 @@ class GUI:
         # store Pluzzle button
         self.storePuzzleBtn = tk.Button(self.window, text="Store puzzle state as: ", command=self.storePuzzleClick)
         self.storePuzzleEntry = tk.Entry(self.window)
-
         self.puzzleSpecs = tk.Label(self.window, text="No active puzzle.")
+        #file selector
+        self.fileSelectBtn = tk.Button(self.window, text="Choose a file", command= self.fileSelector)
 
-        # grid tesing cases.
         # Add widgets to grid
         self.chooseFileBtn.grid(column=0, row=9)
         self.chooseFileEntry.grid(column=1, row=9)
@@ -60,7 +67,8 @@ class GUI:
         self.stepTheSolverBtn.grid(column=0,row=11)
         self.stepCountLabel.grid(column=1,row=11)
         self.stepCountEntry.grid(column=2,row=11)
-        
+        self.fileSelectBtn.grid(column=3, row=11)
+
     def initialBoardCreation(self):
         rowwidth = 20
         rowheight = 4
