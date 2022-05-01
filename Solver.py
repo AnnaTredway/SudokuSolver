@@ -108,5 +108,9 @@ class Solver:
         else:
             stopSieve = False
 
-        self.board.printBoard()
-        return stopSieve
+        #self.board.printBoard()
+
+        if stopSieve == False:
+            return self.solve()
+        else:
+            return
