@@ -1,4 +1,3 @@
-import copy
 import os
 import tkinter as tk
 from tkinter.filedialog import askopenfile
@@ -19,18 +18,19 @@ class GUI:
 
         if os.path.isfile(fileName):
             file = minidom.parse(fileName)
-            #puzzle = PuzzleSpecs(file)
             self.puzzle = PuzzleSpecs(file)
             self.puzzleSpecs.config(text=self.puzzle.convertSpecsToText())
+            self.initialBoardCreation()
         else:
             self.puzzleSpecs.config(text="Error. No such file or directory: " + self.chooseFileEntry.get())
 
     def storePuzzleClick(self):
         storePuzzle = self.storePuzzleEntry.get()
 
-    def __init__(self, window, puzzle):
+    def __init__(self, window, puzzle, solveOnStartup):
         self.window = window
         self.puzzle = puzzle
+        self.solveOnStartup = solveOnStartup
 
         # Declare widgets
         self.listOfFrames = []
@@ -43,7 +43,7 @@ class GUI:
         self.stepCountLabel = tk.Label(self.window, text="Enter step count: ")
         self.stepCountEntry = tk.Entry(self.window)
         #step solver button
-        self.stepTheSolverBtn = tk.Button(self.window, text="Step the Solver")
+        self.stepTheSolverBtn = tk.Button(self.window, text="Complete the puzzle")
         # store Pluzzle button
         self.storePuzzleBtn = tk.Button(self.window, text="Store puzzle state as: ", command=self.storePuzzleClick)
         self.storePuzzleEntry = tk.Entry(self.window)
@@ -76,6 +76,7 @@ class GUI:
                 label.grid(row=row, column=col)
                 self.listOfFrames.append(frame)
                 self.listOfLabels.append(label)
+            
     
     def updateBoard(self, board):
         rowwidth = 20
